@@ -36,9 +36,9 @@ export default function App() {
   const [connected, setConnected] = useState(false);
   const [toast, setToast] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [textInput, setTextInput] = useState("");  
+  const [texts, setTexts] = useState([]);           
   const wsRef = useRef(null);
-  const dropRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
