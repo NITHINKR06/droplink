@@ -4,7 +4,7 @@ import time
 import json
 from pathlib import Path
 from typing import List, Set
-from fastapi import FastAPI, UploadFile, File, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, UploadFile, File, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -94,6 +94,22 @@ async def upload_files(files: List[UploadFile] = File(...)):
 async def list_files():
     return get_files()
 
+@app.post("/send-text")
+async def send_text(request: Request):
+    body = await request.json()
+    text = body.get("text", "").strip()
+    if not text:
+        return JSONResponse(status_code=400, content={"error": "Empty text"})
+    payload = {
+        "type": "text_message",
+        "data": {
+            "id": uuid.uuid4().hex[:8],
+            "text": text,
+            "sent_at": time.time()
+        }
+    }
+    await broadcast(payload)
+    return {"sent": True}
 
 @app.get("/download/{filename}")
 async def download_file(filename: str):
