@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Uploads (don't commit user files)
+backend/uploads/
+backend/static/
+
+# Node
+node_modules/
+frontend/build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+backend/uploads/
+backend/static/
+node_modules/
+frontend/build/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+{
+  "short_name": "DropLink",
+  "name": "DropLink - PC to Mobile Transfer",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#050a0e",
+  "background_color": "#050a0e"
+}
