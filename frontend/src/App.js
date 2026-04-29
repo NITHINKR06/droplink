@@ -4,6 +4,9 @@ import "./App.css";
 const API = "";
 const WS_URL = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
 
+const [textInput, setTextInput] = useState("");
+const [texts, setTexts] = useState([]);
+
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -59,8 +62,20 @@ export default function App() {
       else if (msg.type === "deleted")
         setFiles((prev) => prev.filter((f) => f.filename !== msg.data.filename));
       else if (msg.type === "cleared") setFiles([]);
+      else if (msg.type === "text_message")
+        setTexts((prev) => [msg.data, ...prev]);
     };
   }, []);
+
+  const sendText = async () => {
+    if (!textInput.trim()) return;
+    await fetch(`${API}/send-text`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: textInput })
+    });
+    setTextInput("");
+  };
 
   useEffect(() => {
     connectWS();
@@ -198,6 +213,44 @@ export default function App() {
                     >↓</a>
                     <button className="btn-del" onClick={() => deleteFile(f.filename)}>✕</button>
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Text Share */}
+        <div className="file-section">
+          <div className="section-header">
+            <span className="section-title">SEND TEXT</span>
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <textarea
+              className="text-input"
+              placeholder="Type or paste text, links, notes..."
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              rows={3}
+            />
+            <button className="send-btn" onClick={sendText}>SEND</button>
+          </div>
+        
+          {texts.length > 0 && (
+            <div className="file-list" style={{ marginTop: "12px" }}>
+              {texts.map((t) => (
+                <div className="file-card" key={t.id}>
+                  <span className="file-icon">💬</span>
+                  <div className="file-info">
+                    <span className="file-name" style={{ whiteSpace: "normal", wordBreak: "break-all" }}>
+                      {t.text}
+                    </span>
+                    <span className="file-meta">{formatTime(t.sent_at)}</span>
+                  </div>
+                  <button
+                    className="btn-dl"
+                    style={{ fontSize: "0.75rem", width: "auto", padding: "0 10px" }}
+                    onClick={() => { navigator.clipboard.writeText(t.text); showToast("Copied!"); }}
+                  >COPY</button>
                 </div>
               ))}
             </div>
