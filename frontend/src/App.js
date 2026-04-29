@@ -4,9 +4,6 @@ import "./App.css";
 const API = "";
 const WS_URL = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
 
-const [textInput, setTextInput] = useState("");
-const [texts, setTexts] = useState([]);
-
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -36,9 +33,11 @@ export default function App() {
   const [connected, setConnected] = useState(false);
   const [toast, setToast] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [textInput, setTextInput] = useState("");  
-  const [texts, setTexts] = useState([]);           
+  const [textInput, setTextInput] = useState("");
+  const [texts, setTexts] = useState([]);
   const wsRef = useRef(null);
+  const dropRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -182,6 +181,44 @@ export default function App() {
           )}
         </div>
 
+        {/* Text Share */}
+        <div className="file-section">
+          <div className="section-header">
+            <span className="section-title">SEND TEXT</span>
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <textarea
+              className="text-input"
+              placeholder="Type or paste text, links, notes..."
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              rows={3}
+            />
+            <button className="send-btn" onClick={sendText}>SEND</button>
+          </div>
+
+          {texts.length > 0 && (
+            <div className="file-list" style={{ marginTop: "12px" }}>
+              {texts.map((t) => (
+                <div className="file-card" key={t.id}>
+                  <span className="file-icon">💬</span>
+                  <div className="file-info">
+                    <span className="file-name" style={{ whiteSpace: "normal", wordBreak: "break-all" }}>
+                      {t.text}
+                    </span>
+                    <span className="file-meta">{formatTime(t.sent_at)}</span>
+                  </div>
+                  <button
+                    className="btn-dl"
+                    style={{ fontSize: "0.75rem", width: "auto", padding: "0 10px" }}
+                    onClick={() => { navigator.clipboard.writeText(t.text); showToast("Copied!"); }}
+                  >COPY</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* File List */}
         <div className="file-section">
           <div className="section-header">
@@ -208,49 +245,11 @@ export default function App() {
                   <div className="file-actions">
                     <a
                       className="btn-dl"
-                      href={`${API}/download/${encodeURIComponent(f.filename)}`}
+                      href={f.url || `${API}/download/${encodeURIComponent(f.filename)}`}
                       download
                     >↓</a>
                     <button className="btn-del" onClick={() => deleteFile(f.filename)}>✕</button>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Text Share */}
-        <div className="file-section">
-          <div className="section-header">
-            <span className="section-title">SEND TEXT</span>
-          </div>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <textarea
-              className="text-input"
-              placeholder="Type or paste text, links, notes..."
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              rows={3}
-            />
-            <button className="send-btn" onClick={sendText}>SEND</button>
-          </div>
-        
-          {texts.length > 0 && (
-            <div className="file-list" style={{ marginTop: "12px" }}>
-              {texts.map((t) => (
-                <div className="file-card" key={t.id}>
-                  <span className="file-icon">💬</span>
-                  <div className="file-info">
-                    <span className="file-name" style={{ whiteSpace: "normal", wordBreak: "break-all" }}>
-                      {t.text}
-                    </span>
-                    <span className="file-meta">{formatTime(t.sent_at)}</span>
-                  </div>
-                  <button
-                    className="btn-dl"
-                    style={{ fontSize: "0.75rem", width: "auto", padding: "0 10px" }}
-                    onClick={() => { navigator.clipboard.writeText(t.text); showToast("Copied!"); }}
-                  >COPY</button>
                 </div>
               ))}
             </div>
